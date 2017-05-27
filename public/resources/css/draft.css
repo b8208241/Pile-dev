@@ -1,0 +1,46 @@
+.public-DraftEditorPlaceholder-root{
+  width:100%;
+  margin:0 1;
+  position:absolute;
+  text-align:left;
+  color:#9197a3;
+  z-index:0;
+}
+
+.public-DraftEditorPlaceholder-hasFocus{
+  color:#bdc1c9;
+}
+
+.DraftEditorPlaceholder-hidden{
+  display: none;
+}
+
+.draftJsLinkifyPlugin__link__2ittM, .draftJsLinkifyPlugin__link__2ittM:visited {
+  color: #5e93c5;
+  text-decoration: none;
+}
+
+.draftJsLinkifyPlugin__link__2ittM:hover, .draftJsLinkifyPlugin__link__2ittM:focus {
+  color: #7eadda;
+  outline: 0; /* reset for :focus */
+  cursor: pointer;
+}
+
+.draftJsLinkifyPlugin__link__2ittM:active {
+  color: #4a7bab;
+}
+.draftJsHashtagPlugin__hashtag__1wMVC {
+  color: #000000;
+}
+
+.draftJsHashtagPlugin__hashtag__1wMVC:hover {
+  text-shadow: 1px 1px 1px;
+}
+
+.draftJsQuestionmark__questionmark {
+  color: #5e93c5;
+}
+
+.draftJsHyphen_hyphen {
+  color: #5e93c5;
+}
