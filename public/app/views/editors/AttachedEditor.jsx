@@ -10,19 +10,17 @@ export default class AttachedEditor extends React.Component {
     };
   }
 
+  componentDidMount(){
+
+  }
+
   render(){
     return(
-      <div>
-        <StyleGroup
-          editorState={this.props.editorState}
-          onChange={this.props.changeEditorState}/>
-        <div style={{}}>
-          <Editor
-            editorState={this.props.editorState}
-            onChange={this.props.changeEditorState}
-          />
-        </div>
-      </div>
+      <Editor
+        editorState={this.props.editorState}
+        onChange={this.props.changeEditorState}
+        ref={(element)=> this.editor = element}
+      />
     )
   }
 }

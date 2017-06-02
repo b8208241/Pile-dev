@@ -17,7 +17,8 @@ export default class MainEditor extends React.Component {
           editorState={this.props.editorState}
           changeEditorState={this.props.changeEditorState}
           previewState={this.props.previewState}
-          set_UrlState={this.props.set_UrlState}
+          set_noneTextState={this.props.set_noneTextState}
+          set_contentType={this.props.set_contentType}
           />
       </div>
     )
@@ -30,15 +31,17 @@ class LinkIfEditor extends React.Component {
     this.state = {
 
     };
-    this.handle_Paste_UrlDetect = this.handle_Paste_UrlDetect.bind(this);
+    this.handle_Paste_noneTextDetect = this.handle_Paste_noneTextDetect.bind(this);
   }
 
-  handle_Paste_UrlDetect(text, html) {
+  handle_Paste_noneTextDetect(text, html) {
     if($.isEmptyObject(this.props.previewState)){
       const linkIf = LinkifyIt().match(text);
       if(linkIf !== 'undefined' && linkIf !== null){
         let link = text.substring(linkIf[0].index, linkIf[0].lastIndex+1);
-        this.props.set_UrlState(link);
+        this.props.set_noneTextState("url", link);
+      }else{
+        this.props.set_contentType('text');
       }
     }
   }
@@ -71,7 +74,7 @@ class LinkIfEditor extends React.Component {
           editorState={this.props.editorState}
           onChange={this.props.changeEditorState}
           ref={(element) => {this.editor = element;}}
-          handlePastedText= {(text, html) => {this.handle_Paste_UrlDetect(text, html);}}
+          handlePastedText= {(text, html) => {this.handle_Paste_noneTextDetect(text, html);}}
         />
       </div>
     )

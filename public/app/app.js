@@ -11,7 +11,7 @@ const sagaMiddleware = createSagaMiddleware();
 //const preloadedState = window.__PRELOADED_STATE__
 const store = createStore(
   reducer,
-  {allepiles: {}, tags: {}, status: {}, others: {}},
+  {allepiles: {}, issues: {}, types: {"web":[], "image": [], "text": [], "ohne": []}, tags: {}, status: {}, others: {}},
   applyMiddleware(sagaMiddleware)
 );
 sagaMiddleware.run(rootSaga);

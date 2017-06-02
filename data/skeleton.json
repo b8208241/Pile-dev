@@ -1,0 +1,27 @@
+{
+  "allepiles": {
+    "pile_id": {
+      "rawContent": "",
+      "urlSiteInfo": {"title": "", "url": "", "description": "", "img": ""},
+      "id": "",
+      "time": "",
+      "contentType": "",
+      "tagArr": [],
+      "issueArr": []
+    }
+  },
+  "types": {
+    "web":[],
+    "image": [],
+    "text": [],
+    "ohne": []
+  },
+  "tags": {
+    "tagName": {"include": []}
+  },
+  "issues": {
+    "issueName": {"include": []}
+  },
+  "status": {},
+  "others": {}
+}

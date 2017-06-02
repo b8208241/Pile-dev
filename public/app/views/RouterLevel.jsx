@@ -3,8 +3,9 @@ import {Provider} from 'react-redux'
 import {Router, Route, IndexRoute, browserHistory} from 'react-router'
 //import RoutesLevel from './RoutesLevel.jsx'
 import PileUp from './PileUp.jsx';
+import Issue from './Issue.jsx';
 import UserPiles from './UserPiles.jsx';
-import TagRegion from './TagRegion.jsx';
+import Pick from './Pick.jsx';
 
 export default class RouterLevel extends React.Component {
   render() {
@@ -13,8 +14,9 @@ export default class RouterLevel extends React.Component {
         <Router history={browserHistory}>
           <Route path="/" component={PileUp}>
             <IndexRoute component={UserPiles}/>
-            <Route path=":tagName" component={TagRegion}/>
+            <Route path="pick/:way/:name" component={Pick}/>
           </Route>
+          <Route path="/issue/:issueName" component={Issue}/>
         </Router>
       </Provider>
     );

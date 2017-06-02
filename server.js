@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 //const mysql = require('mysql');
 const bodyParser = require('body-parser');
+const urlParser = require('url');
 const path = require("path");
 const jsonfile = require('jsonfile');
 const request = require('request');
@@ -45,25 +46,41 @@ app.engine('jsx', require('express-react-views').createEngine({transformViews: f
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
-app.get('/req/:purpose', function(req, res){
-  let requestingPage = req.query.url;
-  console.log("requesting: "+requestingPage);
-  request(requestingPage, function(error, response, html){
+app.get('/url/:purpose', function(req, res){
+  console.log(req)
+  let requestingTagret = req.query.url;
+  console.log("requesting: "+requestingTagret);
+  request({method: 'GET', url: requestingTagret, gzip: true}, function(error, response, body){
   	if(error){
   		console.log("Error: "+ error);
+      res.status(response && response.statusCode).end(error);
   	}
   	if(response.statusCode===200){
-  		let cheer$ = cheerio.load(html);
-      let title = cheer$('head>meta[property="og:title"]').attr('content') || cheer$('head>meta[name="title"]').attr('content') || cheer$('head>title').html();
-      let siteName = cheer$('head>meta[property="og:site_name"]').attr('content') || cheer$('head>meta[name="application-name"]').attr('content');
-  		let description = cheer$('head>meta[property="og:description"]').attr('content') || cheer$('head>meta[name="description"]').attr('content');
-      let img = cheer$('head>meta[property="og:image"]').attr('content');
-      let url = cheer$('head>meta[property="og:url"]').attr('content');
+      let contentType = response.headers["content-type"];
+      let resObj = {};
+      if(contentType.includes("image")){
+        resObj = {response: response, contentType: "image", img: requestingTagret};
+      }else if(contentType.includes("html")){
+        let cheer$ = cheerio.load(body);
+        let title = cheer$('head>meta[property="og:title"]').attr('content') || cheer$('head>meta[name="title"]').attr('content') || cheer$('head>title').html();
+        let siteName = cheer$('head>meta[property="og:site_name"]').attr('content') || cheer$('head>meta[name="application-name"]').attr('content');
+        let description = cheer$('head>meta[property="og:description"]').attr('content') || cheer$('head>meta[name="description"]').attr('content');
+        let img = cheer$('head>meta[property="og:image"]').attr('content');
+        let url = cheer$('head>meta[property="og:url"]').attr('content');
+        resObj = {response: response, contentType: "web", title: title, siteName: siteName, description: description, img: img, url: url};
+      }else if(contentType.includes("pdf")){
+        let fileHost = urlParser.parse(requestingTagret).hostname;
+        resObj = {response: response, contentType: 'file-pdf', fileHost: fileHost}
+      }else{
+        let cheer$ = cheerio.load(body);
+        let title = cheer$('head>meta[property="og:title"]').attr('content') || cheer$('head>meta[name="title"]').attr('content') || cheer$('head>title').html();
+        resObj = {response: response, contentType: 'unclear', title: title};
+      }
 
-      res.setHeader('Content-Type', 'text/plain')
-      res.json({title: title, siteName: siteName, description: description, img: img, url: url})
+      res.setHeader('Content-Type', "text/plain")
+      res.status(200).json(resObj);
   	}else{
-      console.log("Status Code: "+ response.statusCode);
+      console.log("Status Code Error: "+ response.statusCode);
       res.end();
     }
   })
@@ -82,7 +99,8 @@ app.use('/resources/:type/:file', function(req, res){
     'png' : 'image/png',
     'gif' : 'image/gif',
     'css' : 'text/css',
-    'js' : 'application/javascript'
+    'js' : 'application/javascript',
+    'json': 'application/json'
   }[filetype];
   console.log(mimetype)
   res.setHeader('Content-Type', mimetype)

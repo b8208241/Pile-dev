@@ -6,7 +6,9 @@ import update from 'immutability-helper';
 import {
   PILE_SUBMIT,
   POST_PILE,
-  PATCH_TAGS
+  PATCH_ISSUES,
+  PATCH_TAGS,
+  PATCH_TYPES
 } from './reduxsaga/constants.js'
 import {
   createObject
@@ -20,13 +22,35 @@ export function * pileSubmit (){
     let pilePosted = new Object();
     pilePosted[data.pileobj.id] = data.pileobj;
 
+    let contentType = data.pileobj.contentType ? data.pileobj.contentType : "ohne";
+    yield put({
+      type: PATCH_TYPES,
+      pileId: data.pileobj.id,
+      contentType: contentType
+    })
+
     yield put({
       type: POST_PILE,
       pilePosted: pilePosted
     })
 
+    if(data.pileobj.issueArr.length){
+      let currentIssues = yield select((state) => state.issues);
+      let newIssues = {};
+      let existedIssues = [];
+      data.pileobj.issueArr.forEach(function(issueName, index, arr){
+        currentIssues[issueName] ? existedIssues.push(issueName) : newIssues[issueName] = {include: [data.pileobj.id]}
+      })
+      yield put({
+        type: PATCH_ISSUES,
+        pileId: data.pileobj.id,
+        newIssues: newIssues,
+        existedIssues: existedIssues
+      })
+    }
+
     if(data.pileobj.tagArr.length){
-      let currentTags = select((state) => state.tags);
+      let currentTags = yield select((state) => state.tags);
       let newTags = {};
       let existedTags = [];
       data.pileobj.tagArr.forEach(function(pileTag, index, arr){
