@@ -5,8 +5,11 @@ import {take, call, put, fork, race, select} from 'redux-saga/effects'
 import update from 'immutability-helper';
 import {
   PILE_SUBMIT,
+  UPDATE_PILE_ISSUEARR,
   POST_PILE,
+  PATCH_PILE_ISSUEARR,
   PATCH_ISSUES,
+  PATCH_ISSUES_UPDATE,
   PATCH_TAGS,
   PATCH_TYPES
 } from './reduxsaga/constants.js'
@@ -14,7 +17,7 @@ import {
   createObject
 } from './reduxsaga/tools.js'
 
-export function * pileSubmit (){
+function * pileSubmit (){
   while (true) {
     const data = yield take(PILE_SUBMIT);
     console.log('saga, pileSubmit start');
@@ -66,6 +69,26 @@ export function * pileSubmit (){
   }
 }
 
+function * _updatePile_issueArr (){
+  while(true){
+    const data = yield take(UPDATE_PILE_ISSUEARR);
+    console.log('saga, _updatePile_issueArr start');
+
+    yield put({
+      type: PATCH_PILE_ISSUEARR,
+      pileId: data.pileobj.id,
+      patchedPileIssueArr: data.pileobj.issueArr
+    })
+
+    yield put({
+      type: PATCH_ISSUES_UPDATE,
+      pileId: data.pileobj.id,
+      addedIssue: data.issueName
+    })
+
+  }
+}
+
 
 // The root saga is what we actually send to Redux's middleware. In here we fork
 // each saga so that they are all "active" and listening.
@@ -73,4 +96,5 @@ export function * pileSubmit (){
 // in the background, watching actions dispatched to the store.
 export default function * rootSaga () {
   yield fork(pileSubmit)
+  yield fork(_updatePile_issueArr)
 }

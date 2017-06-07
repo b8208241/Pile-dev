@@ -20,7 +20,7 @@ export default class ModalBox extends React.Component {
 
   componentWillUnmount(){
     ReactDOM.unmountComponentAtNode(this.newModalBox);
-    document.getElementsByClassName('container')[0].removeChild(this.newModalBox);
+    document.body.removeChild(this.newModalBox);
   }
 
   render() {

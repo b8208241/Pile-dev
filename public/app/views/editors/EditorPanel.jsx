@@ -1,9 +1,8 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import MainEditor from './MainEditor.jsx';
-import AttachedEditor from './AttachedEditor.jsx';
 import UrlPreview from '../generals/UrlPreview.jsx';
-import {EditorState, ContentState, convertToRaw, convertFromRaw, Modifier} from 'draft-js';
+import {Editor, EditorState, ContentState, convertToRaw, convertFromRaw, Modifier} from 'draft-js';
 import createHashtagPlugin from 'draft-js-hashtag-plugin';
 import createLinkifyPlugin from 'draft-js-linkify-plugin';
 import {pluginsDecoratorCreate} from '../generals/draft/pluginsDecoratorCreate.jsx';
@@ -27,9 +26,9 @@ export default class EditorPanel extends React.Component {
     this.changeMainEditorState = (newState) => this.setState({mainEditorState: newState});
     this.changeTagsEditorState = (newState) => this.setState({tagsEditorState: newState});
     this.changeIssueEditorState = (newState) => this.setState({issuesEditorState: newState});
-    this.set_contentType = (contentType) => this.setState({contentType: contentType});
     this.set_noneTextState = (build, link) => this.setState({noneText: {build: build, value: link}});
-    this.set_noneTextData = (previewData, contentType) => this.setState({previewState: previewData, contentType: contentType});
+    this.set_contentType = (contentType) => this.setState({contentType: contentType});
+    this.set_urlPreivew = (previewData, contentType) => this.setState({previewState: previewData, contentType: contentType});
     this.handle_Click_IssueEditor = this.handle_Click_IssueEditor.bind(this);
     this.handle_Click_Create = this.handle_Click_Create.bind(this);
   }
@@ -69,10 +68,9 @@ export default class EditorPanel extends React.Component {
     if(issueText.length !== 0){
       let issueName = issueText.slice(1, (issueText.length)-1)
       issueArr.push(issueName)
-      if(this.props.currentIssue){
-          let currentIssue = $('#issueEditor_currentIssue').text();
-          issueArr.push(currentIssue)
-      }
+    }
+    if(this.props.currentIssue){
+        issueArr.push(this.props.currentIssue)
     }
 
     this.props.create_pile(
@@ -99,7 +97,7 @@ export default class EditorPanel extends React.Component {
 
   render() {
     let noneTextPreview = []
-    ,set_noneTextData = this.set_noneTextData
+    ,set_urlPreivew = this.set_urlPreivew
     ,state = this.state;
     switch (this.state.noneText.build) {
       case "url":
@@ -109,7 +107,7 @@ export default class EditorPanel extends React.Component {
               contentType={state.contentType}
               urlValue={state.noneText.value}
               previewState={state.previewState}
-              set_noneTextData={set_noneTextData}
+              set_urlPreivew={set_urlPreivew}
               />
           </div>
         )
@@ -119,10 +117,10 @@ export default class EditorPanel extends React.Component {
     };
 
     return(
-      <div style={{backgroundColor: "#555555"}}>
+      <div style={{minHeight: "20vh"}}>
         <span>{this.state.contentType}</span>
-        {noneTextPreview}
-        <div style={{padding: "0.5vh 0", marginBottom: "2%", backgroundColor: "#FFFFFF"}}>
+        <div style={{minHeight: "15vh", padding: "0.5vh 0", marginBottom: "2%", boxSizing: "border-box", backgroundColor: "#FFFFFF"}}>
+          {noneTextPreview}
           <MainEditor
             editorState={this.state.mainEditorState}
             changeEditorState={this.changeMainEditorState}
@@ -131,29 +129,37 @@ export default class EditorPanel extends React.Component {
             set_contentType={this.set_contentType}
             />
         </div>
+        <div style={{width: "70%", position: "relative", left: "50%", transform: "translate(-50%, 0)", borderBottom: "1px solid #9C9898"}}></div>
         {
           this.props.currentIssue &&
-          <div id="issueEditor_currentIssue" style={{backgroundColor: "FFFFFF"}}>
+          <div id="" style={{backgroundColor: "FFFFFF"}}>
             {this.props.currentIssue}
           </div>
         }
-        <div style={{padding: "0.3vh 0", marginBottom: "2%", backgroundColor: "#FFFFFF"}} onClick={this.handle_Click_IssueEditor}>
-          <AttachedEditor
-            editorState={this.state.issuesEditorState}
-            changeEditorState={this.changeIssueEditorState}
-            />
-        </div>
-        <div style={{padding: "0.3vh 0", marginBottom: "2%", backgroundColor: "#FFFFFF"}}>
-          <AttachedEditor
+        <div
+          style={{display: "inline-block", width: "60%", padding: "0.3vh 0", marginTop: "2%", boxSizing: "border-box", borderRight: "1px solid #9C9898", backgroundColor: "#FFFFFF"}}
+          onClick={(event) => this.tagsEditor.focus()}>
+          <Editor
             editorState={this.state.tagsEditorState}
-            changeEditorState={this.changeTagsEditorState}/>
-        </div>
-        <input
-          value="create"
-          type="button"
-          style={{}}
-          onClick={this.handle_Click_Create}
+            onChange={this.changeTagsEditorState}
+            ref={(element)=> this.tagsEditor = element}
+            placeholder="#..."
           />
+        </div>
+        <div
+          style={{display: "inline-block", width: "35%", padding: "0.3vh 0", marginTop: "2%", boxSizing: "border-box", backgroundColor: "#FFFFFF"}} onClick={this.handle_Click_IssueEditor}
+          onClick={(event) => this.issuesEditor.focus()}>
+          <Editor
+            editorState={this.state.issuesEditorState}
+            onChange={this.changeIssueEditorState}
+            ref={(element)=> this.issuesEditor = element}
+            placeholder="[...]"
+          />
+        </div>
+        <span
+          style={{display: "inline-block", width: "30%", marginTop: "2%", fontWeight: "bold", color: "#9C9898", cursor: "pointer"}}
+          onClick={this.handle_Click_Create}
+          >create</span>
       </div>
     )
   }

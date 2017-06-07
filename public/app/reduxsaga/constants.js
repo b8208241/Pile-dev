@@ -6,9 +6,11 @@ export const LOGOUT = 'LOGOUT'
 export const SENDING_REQUEST = 'SENDING_REQUEST'
 
 export const PATCH_ISSUES= 'PATCH_ISSUES'
+export const PATCH_ISSUES_UPDATE = 'PATCH_ISSUES_UPDATE'
 export const PATCH_TAGS = 'PATCH_TAGS'
 export const PATCH_TYPES = 'PATCH_TYPES'
 
-export const POST_PILE = 'POST_PILE'
-
 export const PILE_SUBMIT = 'PILE_SUBMIT'
+export const UPDATE_PILE_ISSUEARR = 'UPDATE_PILE_ISSUEARR'
+export const POST_PILE = 'POST_PILE'
+export const PATCH_PILE_ISSUEARR = 'PATCH_PILE_ISSUEARR'

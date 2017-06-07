@@ -8,29 +8,6 @@ export default class MainEditor extends React.Component {
     this.state = {
 
     };
-  }
-
-  render() {
-    return (
-      <div className={this.props.className}>
-        <LinkIfEditor
-          editorState={this.props.editorState}
-          changeEditorState={this.props.changeEditorState}
-          previewState={this.props.previewState}
-          set_noneTextState={this.props.set_noneTextState}
-          set_contentType={this.props.set_contentType}
-          />
-      </div>
-    )
-  }
-}
-
-class LinkIfEditor extends React.Component {
-  constructor(props){
-    super(props);
-    this.state = {
-
-    };
     this.handle_Paste_noneTextDetect = this.handle_Paste_noneTextDetect.bind(this);
   }
 
@@ -52,7 +29,6 @@ class LinkIfEditor extends React.Component {
   }
 
   componentDidUpdate(){
-    console.log('MainEditor did update');
     /*
     const {editorState} = this.props;
     const selectionState = editorState.getSelection();
@@ -69,7 +45,7 @@ class LinkIfEditor extends React.Component {
 
   render(){
     return(
-      <div style={{}}>
+      <div className={this.props.className} style={{}}>
         <Editor
           editorState={this.props.editorState}
           onChange={this.props.changeEditorState}

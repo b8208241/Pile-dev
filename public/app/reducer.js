@@ -2,7 +2,9 @@ import {combineReducers} from 'redux';
 import update from 'immutability-helper';
 import {
   POST_PILE,
+  PATCH_PILE_ISSUEARR,
   PATCH_ISSUES,
+  PATCH_ISSUES_UPDATE,
   PATCH_TAGS,
   PATCH_TYPES
 } from './reduxsaga/constants.js'
@@ -13,6 +15,14 @@ function allepiles (state={}, action) {
       console.log('reducer allepiles, POST_PILE');
       return update(state, {
         $merge: action.pilePosted
+      })
+      break;
+    case PATCH_PILE_ISSUEARR:
+      console.log('reducer allepiles, PATCH_PILE_ISSUEARR');
+      return update(state, {
+        [action.pileId]: {
+          "issueArr": {$set: action.patchedPileIssueArr}
+        }
       })
       break;
     default:
@@ -34,6 +44,16 @@ function issues(state={}, action) {
           return obj;
         },
         $merge: action.newIssues
+      })
+      break;
+    case PATCH_ISSUES_UPDATE:
+      console.log('reducer issues, PATCH_ISSUES_UPDATE')
+      return update(state, {
+        [action.addedIssue]: {
+          "include": {
+            $push: [action.pileId]
+          }
+        }
       })
       break;
     default:

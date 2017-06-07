@@ -1,6 +1,7 @@
 import {
   LOG_SUBMIT,
   PILE_SUBMIT,
+  UPDATE_PILE_ISSUEARR,
   SENDING_REQUEST,
   CLEAR_ERROR,
   REQUEST_ERROR
@@ -8,6 +9,10 @@ import {
 
 export function pileSubmit(pileobj){
   return{type: PILE_SUBMIT, pileobj}
+}
+
+export function _updatePile_issueArr(pileobj, issueName){
+  return {type: UPDATE_PILE_ISSUEARR, pileobj, issueName}
 }
 
 export function LogSubmit(logDraftData, topicId, userName){

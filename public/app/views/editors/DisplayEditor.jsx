@@ -1,6 +1,6 @@
 import React from 'react';
 import {pluginsDecoratorCreate} from '../generals/draft/pluginsDecoratorCreate.jsx';
-import {Editor, EditorState, convertToRaw, convertFromRaw} from 'draft-js';
+import {Editor, EditorState, convertToRaw, convertFromRaw, ContentState} from 'draft-js';
 import createHashtagPlugin from 'draft-js-hashtag-plugin';
 import createLinkifyPlugin from 'draft-js-linkify-plugin';
 const linkifyPlugin = createLinkifyPlugin({target: '_blank'});
@@ -11,9 +11,15 @@ export default class DisplayEditor extends React.Component {
   constructor(props){
     super(props);
     this.state = {
-      editorState: EditorState.createWithContent(convertFromRaw(this.props.rawContent), pluginDecorators)
+      editorState: null
     };
     this.changeeditorState = () => {};
+  }
+
+  componentWillMount(){
+    const firstBlock = convertFromRaw(this.props.rawContent).getFirstBlock();
+    const contentStateOnlyFirstBlock = ContentState.createFromBlockArray([firstBlock]);
+    this.setState({editorState: EditorState.createWithContent(contentStateOnlyFirstBlock, pluginDecorators)})
   }
 
   render() {
