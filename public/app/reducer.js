@@ -61,7 +61,7 @@ function issues(state={}, action) {
   }
 }
 
-function types (state={"web":[], "image": [], "text": [], "ohne": []}, action) {
+function types (state={"web":[], "image": [], "text": [], "file-pdf": [], "ohne": []}, action) {
   switch (action.type) {
     case PATCH_TYPES:
       console.log('reducer types, PATCH_TYPES')

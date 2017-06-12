@@ -11,22 +11,70 @@ class UserPiles extends React.Component {
   }
 
   render() {
-    let XSsize = {maxWidth: "60%", height: "65%", margin: "auto", border: "3px solid", borderColor: "#D64A1E", overflowY: "hidden"};
-    let Ssize = {maxWidth: "75%", height: "75%", margin: "auto", border: "3px solid", borderColor: "#D64A1E", overflowY: "hidden"};
-    let Msize = {maxWidth: "88%", height: "85%", margin: "auto", border: "3px solid", borderColor: "#D64A1E", overflowY: "hidden"};
-    let Lsize = {maxWidth: "100%", height: "100%", margin: "auto", border: "3px solid", borderColor: "#D64A1E", overflowY: "hidden"};
-    let piles = [];
-    $.each(this.props.allepiles, function(key, value){
+    const ulStyle = {
+      display: "flex",
+      flexDirection: "column",
+      flexWrap: "wrap",
+      alignContent: "flex-start",
+      width: "95%",
+      height: "90%",
+      padding: '0',
+      position: "absolute",
+      top: '5%',
+      left: "0",
+      listStyle: "none",
+      overflowX: "auto"
+    };
+
+    const allepiles = this.props.allepiles;
+    const keysArr = Object.keys(allepiles);
+    /**reverse() here is just because the order in reducer starting from the earlist
+    could delete if the reducer would be modified**/
+    keysArr.reverse();
+    let piles = _renderByOrder(allepiles, keysArr)
+
+    return(
+      <ul style={ulStyle}>
+        {piles}
+      </ul>
+    )
+  }
+}
+
+function _renderByOrder(allepiles, keysArr){
+  return keysArr.map(
+    function(id, index){
+      const pileData = allepiles[id];
+      const listStyle = {
+        display: "inline-flex",
+        justifyContent: "center",
+        alignItems: "center",
+        width: "28%",
+        height: "30%",
+        boxSizing: 'border-box'
+      };
+      const listDivStyle = {
+        width: '88%',
+        height: '90%',
+        margin: "",
+        boxSizing: 'border-box',
+        border: "3px solid",
+        borderColor: "#D64A1E",
+        overflow: "hidden",
+        fontSize: "",
+        cursor: "pointer"
+      };
+
       let renderElement;
-      let contentType = value.contentType;
+      let contentType = pileData.contentType;
       switch (contentType) {
         case "web":
         let renderType;
         let previewState = {
-          "description": value.urlSiteInfo.description,
-          "img": value.urlSiteInfo.img,
-          "url": value.urlSiteInfo.url,
-          "title": value.urlSiteInfo.title
+          "description": pileData.urlSiteInfo.description,
+          "img": pileData.urlSiteInfo.img,
+          "url": pileData.urlSiteInfo.url,
+          "title": pileData.urlSiteInfo.title
         };
         $.each(previewState, function(previewKey, previewValue){
           if(previewValue == null){
@@ -38,53 +86,49 @@ class UserPiles extends React.Component {
         })
         switch (renderType) {
           case "img":
-            renderElement = (<div><h4>{value.urlSiteInfo.title}</h4><img src={value.urlSiteInfo.img} style={{maxWidth: "80%", maxHeight: "100%"}}/></div>);
+            renderElement = (<div><h4>{pileData.urlSiteInfo.title}</h4><img src={pileData.urlSiteInfo.img} style={{maxWidth: "80%", maxHeight: "100%"}}/></div>);
             break;
           case "description":
-            renderElement = (<div><h4>{value.urlSiteInfo.title}</h4><p>{value.urlSiteInfo.description}</p></div>)
+            renderElement = (<div><h4>{pileData.urlSiteInfo.title}</h4><p>{pileData.urlSiteInfo.description}</p></div>)
             break;
           case "url":
-            renderElement = (<div><h4>{value.urlSiteInfo.title}</h4><a href={value.urlSiteInfo.url} target="_blank">{value.urlSiteInfo.url}</a></div>);
+            renderElement = (<div><h4>{pileData.urlSiteInfo.title}</h4><a href={pileData.urlSiteInfo.url} target="_blank">{pileData.urlSiteInfo.url}</a></div>);
             break;
           case "title":
-            renderElement = (<div><h4>{value.urlSiteInfo.title}</h4></div>);
+            renderElement = (<div><h4>{pileData.urlSiteInfo.title}</h4></div>);
             break;
           default:
-            renderElement = (<DisplayEditor className='' rawContent={value.rawContent}/>)
+            renderElement = (<DisplayEditor className='' rawContent={pileData.rawContent}/>)
         }
           break;
         case "image":
-          renderElement = (<img src={value.urlSiteInfo.img} style={{maxWidth: "80%", height: "auto"}}/>);
+          renderElement = (<img src={pileData.urlSiteInfo.img} style={{maxWidth: "80%", height: "auto"}}/>);
           break;
         case "file-pdf":
-          renderElement = (<div><div>{value.urlSiteInfo.fileHost}</div><img src={value.urlSiteInfo.icon} style={{maxWidth: "80%", height: "auto"}}/></div>);
+          renderElement = (<div><div>{pileData.urlSiteInfo.fileHost}</div><embed type="application/pdf" src={pileData.urlSiteInfo.embed} style={{width: "95%", height: "auto"}}/></div>);
           break;;
         case "unclear":
-          renderElement = (<h4>{value.urlSiteInfo.title}</h4>)
+          renderElement = (<h4>{pileData.urlSiteInfo.title}</h4>)
           break;
         default:
-          renderElement = (<DisplayEditor className='' rawContent={value.rawContent}/>);
+          renderElement = (<DisplayEditor className='' rawContent={pileData.rawContent}/>);
           break;
       }
-      piles.unshift(
+      return (
         <li
-          key={"pileupkey_"+String(value.id)}
-          id={"pileupid_"+String(value.id)}
-          style={{display: "inline-block", width: "23vw", height: "32vh", margin: "1vh 1vw"}}>
+          key={"key_UserPiles"+String(pileData.id)}
+          id={"id_UserPiles"+String(pileData.id)}
+          data-keysarr-index={index}
+          style={listStyle}>
           <div
-            style={value.time%4===0 ? Lsize : value.time%4===1 ? Msize : value.time%4===2 ? Ssize : XSsize}>
+            style={listDivStyle}
+            >
             {renderElement}
           </div>
         </li>
       );
-    });
-
-    return(
-      <ul style={{width: "80%", maxHeight: "85vh", padding: '0', position: "absolute", top: '40%', left: "3%", transform: "translate(0, -40%)", listStyle: "none", overflow: "auto"}}>
-        {piles}
-      </ul>
-    )
-  }
+    }
+  )
 }
 
 function mapStateToProps (state) {

@@ -21,7 +21,7 @@ export default class UrlPreview extends React.Component {
           contentType = "image";
           break;
         case "file-pdf":
-          previewData = {fileHost: data.fileHost, icon: "http://www.freeiconspng.com/uploads/pdf-icon-png-pdf-zum-download-2.png"}
+          previewData = {fileHost: data.fileHost, embed: data.embed}
           contentType = "file-pdf";
           break;
         case "unclear":
@@ -77,7 +77,7 @@ export default class UrlPreview extends React.Component {
         children.push(
           <div key="key_urlpreview_image">
             <h4>{this.props.previewState.fileHost}</h4>
-            <img src={this.props.previewState.icon} style={{Width: "35%", height: "auto"}}/>
+            <embed type="application/pdf" src={this.props.previewState.embed}/>
           </div>
         )
       default:

@@ -75,7 +75,7 @@ app.get('/url/:purpose', function(req, res){
       }else if(contentType.includes("pdf")){
         console.log('Response Content: PDF');
         let fileHost = urlParser.parse(reqTargetUrl).hostname;
-        resObj = {response: response, contentType: 'file-pdf', fileHost: fileHost}
+        resObj = {response: response, contentType: 'file-pdf', fileHost: fileHost, embed: reqTargetUrl}
       }else{
         console.log('Response Content: unclear');
         let cheer$ = cheerio.load(body);
@@ -120,6 +120,23 @@ app.use('/resources/:type/:file', function(req, res){
   });
 })
 
+app.use('/_dev/bundle',function(req, res){
+  res.setHeader('Content-Type', 'application/javascript');
+  console.log('requesting for bundle.js');
+  browserify({debug: true})
+    .transform(babelify.configure({
+      presets: [
+        "react",
+        "env"
+      ],
+      compact: false
+    }))
+    .require("./_dev/app.js", {entry: true})
+    .bundle()
+    .on("error", function (err) { console.log("Error: " + err.message); })
+    .pipe(res);
+})
+
 app.use('/bundle',function(req, res){
   res.setHeader('Content-Type', 'application/javascript');
   console.log('requesting for bundle.js');
@@ -135,6 +152,35 @@ app.use('/bundle',function(req, res){
     .bundle()
     .on("error", function (err) { console.log("Error: " + err.message); })
     .pipe(res);
+})
+
+app.use('/_dev', function(req, res){
+  console.log("requesting for index");
+  let htmlHead = ReactDOMServer.renderToStaticMarkup(
+    head(
+     null,
+     title({dangerouslySetInnerHTML:{__html: "Pileup"}}),
+     meta({charSet: "utf-8"}),
+     meta({name: "description", content: ""}),
+     meta({property: "og:url", content: ""}),
+     meta({property: "og:image", content: ""}),
+     script({src: "https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js", type: "text/javascript"}),
+     script({src: "https://unpkg.com/axios/dist/axios.min.js"}),
+     link({rel: "stylesheet", type: "text/css", href: "/resources/css/draft.css"}),
+     link({rel: "stylesheet", href: "https://fonts.googleapis.com/earlyaccess/notosanstc.css"}),
+     style({fontFamily: "'Noto Sans TC', '微軟正黑體', 'Helvetica Neue', Helvetica, Futura, sans-serif, Arial", })
+   )
+  );
+  let htmlBody = ReactDOMServer.renderToStaticMarkup(
+    body(
+     null,
+     main({id: 'app'}),
+     script({src: '/_dev/bundle'})
+   )
+  );
+
+  res.setHeader('Content-Type', 'text/html');
+  res.end(htmlHead + htmlBody);
 })
 
 app.use('/', function(req, res){

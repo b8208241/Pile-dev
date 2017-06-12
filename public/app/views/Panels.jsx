@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router';
 import EditorPanel from './editors/EditorPanel.jsx';
 
-export default class PileUp extends React.Component {
+export default class Panels extends React.Component {
   constructor(props){
     super(props);
     this.state = {
@@ -13,7 +13,7 @@ export default class PileUp extends React.Component {
 
   render() {
     return(
-      <div style={{width: "35%", maxHeight: "60vh", position: "fixed", top: "23%", left: "32%", backgroundColor: "#FFFFFF", zIndex: '1'}}>
+      <div style={{width: "35%", maxHeight: "60vh", position: "fixed", top: "70%", left: "32%", transform: "translate(0, -50%)", backgroundColor: "#FFFFFF", zIndex: '1'}}>
         {
           this.state.editorFocus ?
             <div style={{width: "100%", maxHeight: "50vh", boxShadow: "0 0 5px 0px", overflowY: "auto"}}>

@@ -75,7 +75,7 @@ function renderDOMPile(pileData, location){
       renderElement = (<img src={pileData.urlSiteInfo.img} style={{maxWidth: "80%", height: "auto"}}/>);
       break;
     case "file-pdf":
-      renderElement = (<div><div>{pileData.urlSiteInfo.fileHost}</div><img src={pileData.urlSiteInfo.icon} style={{maxWidth: "80%", height: "auto"}}/></div>);
+      renderElement = (<div><div>{pileData.urlSiteInfo.fileHost}</div><embed type="application/pdf" src={pileData.urlSiteInfo.embed} style={{width: "95%", height: "auto"}}/></div>);
       break;;
     case "unclear":
       renderElement = (<h4>{pileData.urlSiteInfo.title}</h4>)
