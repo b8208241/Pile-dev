@@ -12,7 +12,7 @@ const hashtagPlugin = createHashtagPlugin();
 const pluginDecorators = pluginsDecoratorCreate([linkifyPlugin, hashtagPlugin]);
 const pluginDecoratorsOnlyLink = pluginsDecoratorCreate([linkifyPlugin]);
 
-export default class EditorPanel extends React.Component {
+export default class InputEditor extends React.Component {
   constructor(props){
     super(props);
     this.state = {
@@ -91,6 +91,10 @@ export default class EditorPanel extends React.Component {
     });
   }
 
+  componentWillMount(){
+
+  }
+
   componentDidMount(){
 
   }
@@ -129,33 +133,12 @@ export default class EditorPanel extends React.Component {
             set_contentType={this.set_contentType}
             />
         </div>
-        <div style={{width: "70%", position: "relative", left: "50%", transform: "translate(-50%, 0)", borderBottom: "1px solid #9C9898"}}></div>
         {
           this.props.currentIssue &&
           <div id="" style={{}}>
             {this.props.currentIssue}
           </div>
         }
-        <div
-          style={{display: "inline-block", width: "60%", padding: "0.3vh 0", marginTop: "2%", boxSizing: "border-box", borderRight: "1px solid #9C9898"}}
-          onClick={(event) => this.tagsEditor.focus()}>
-          <Editor
-            editorState={this.state.tagsEditorState}
-            onChange={this.changeTagsEditorState}
-            ref={(element)=> this.tagsEditor = element}
-            placeholder="#..."
-          />
-        </div>
-        <div
-          style={{display: "inline-block", width: "35%", padding: "0.3vh 0", marginTop: "2%", boxSizing: "border-box"}} onClick={this.handle_Click_IssueEditor}
-          onClick={(event) => this.issuesEditor.focus()}>
-          <Editor
-            editorState={this.state.issuesEditorState}
-            onChange={this.changeIssueEditorState}
-            ref={(element)=> this.issuesEditor = element}
-            placeholder="[...]"
-          />
-        </div>
         <span
           style={{display: "inline-block", width: "30%", marginTop: "2%", fontWeight: "bold", color: "#9C9898", cursor: "pointer"}}
           onClick={this.handle_Click_Create}

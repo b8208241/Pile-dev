@@ -1,101 +1,103 @@
 import React from 'react';
-import { Link } from 'react-router';
 import {connect} from 'react-redux';
-import update from 'immutability-helper';
+import { Link } from 'react-router';
+import UserPiles from './UserPiles.jsx';
+import UrlPreview from './generals/UrlPreview.jsx';
+import IssuePanel from './generals/IssuePanel.jsx';
 import EditorPanel from './editors/EditorPanel.jsx';
 import DisplayEditor from './editors/DisplayEditor.jsx';
-import UrlPreview from './generals/UrlPreview.jsx';
-import ModalBox from './generals/ModalBox.jsx';
-import {pileSubmit, _updatePile_issueArr} from '../reduxsaga/dispatch.js';
+import {pileSubmit} from '../reduxsaga/dispatch.js';
 
 class Issue extends React.Component {
   constructor(props){
     super(props);
     this.state = {
-      issuePiles: [],
-      creatingState: false,
-      userPilesList: false
+      editing: false
     };
+    this.handle_click_crystal = (event) => {event.preventDefault();event.stopPropagation();this.setState({editing: false})};
+    this.handle_click_input = (event) => {event.preventDefault();event.stopPropagation();this.setState({editing: true})};
     this.create_pile = this.create_pile.bind(this);
-    this.attach_pile_issue = this.attach_pile_issue.bind(this);
-    this.issueName = this.props.params.issueName;
-  }
-
-  attach_pile_issue(id){
-    let issueName = this.issueName;
-    let newPileData = update(this.props.allepiles[id], {
-      "issueArr": {$push: [issueName]}
-    });
-    let newPile = renderDOMPile(newPileData, this.issueName)
-    this.state.issuePiles.push(newPile);
-    this.setState({issuePiles: this.state.issuePiles});
-    this.props.dispatch(_updatePile_issueArr(newPileData, issueName))
   }
 
   create_pile(rawContent, urlSiteInfo, id, time, contentType, tagArr, issueArr) {
-    let newPileData = {rawContent: rawContent, urlSiteInfo: urlSiteInfo, id: id, time: time, contentType: contentType, tagArr: tagArr, issueArr: issueArr};
-    let newPile = renderDOMPile(newPileData, this.issueName);
-    this.state.issuePiles.push(newPile);
-    this.setState({issuePiles: this.state.issuePiles});
-    this.props.dispatch(pileSubmit(newPileData));
+    this.props.dispatch(pileSubmit({rawContent: rawContent, urlSiteInfo: urlSiteInfo, id: id, time: time, contentType: contentType, tagArr: tagArr, issueArr: issueArr}));
   }
 
-  componentWillMount(){
-    const allepiles = this.props.allepiles;
-    let issueName = this.issueName;
-    let piles = this.props.issues[this.issueName].include.map(
-      function(id){
-        let pileData = allepiles[id];
-        let pile = renderDOMPile(pileData, issueName);
-        return pile;
-      }
-    )
-    this.setState({issuePiles: piles});
-  }
+  render(){
+    const issueStyle = {
+      width: "90%",
+      height: "90%",
+      position: "relative",
+      zIndex: "0"
+    }
+    const crystalStyle = {
+      position: "absolute",
+      top: "0",
+      left: "5%",
+      transform: "translate(-50%, 0)"
+    }
+    const issueNameStyle = {
+      position: "absolute",
+      top: "0",
+      right: "0"
+    }
+    const issuesAsideStyle ={
+      width: "5%",
+      height: "60%",
+      position: "absolute",
+      top: "50%",
+      left: "1%",
+      transform: "translate(0, -50%)",
+    }
+    const inputEntryStyle = {
+      width: "20%",
+      height: "5%",
+      position: "absolute",
+      top: "5%",
+      right: "0%",
+      backgroundColor: "#FFFFFF",
+      boxShadow: "0 0 5px 0px"
+    }
+    const inputPanelStyle = {
+      width: "35%",
+      maxHeight: "50vh",
+      position: "absolute",
+      top: "25%",
+      left: "52%",
+      transform: "translate(-50%, 0)",
+      backgroundColor: "#FFFFFF",
+      boxShadow: "0 0 5px 0px",
+      overflowY: "auto"
+    }
 
-  render() {
     return(
-      <section style={{fontSize: "16px", fontFamily: "'Noto Sans TC', Helvetica, '微軟正黑體', sans-serif"}}>
-        <div style={{display: "inline-block", marginLeft: "5%", fontSize: "1.8rem", fontWeight: "bold"}}>Curios</div>
-        <div style={{position: "fixed", top: "35%", right: "3%", backgroundColor: "#FFFFFF", textAlign: "left", zIndex: '1'}}>
-          <Link to="/" activeStyle={{textDecoration: "none", color: "black"}}><p><span style={{fontSize: "1.8rem", fontWeight: "bold", letterSpace: "0.5rem", lineHeight: "0.5rem"}}>User Me</span></p></Link>
+      <div style={issueStyle}>
+        <div
+          style={crystalStyle}
+          onClick={this.handle_click_crystal}>
+          (crystal)
         </div>
+        <aside style={issuesAsideStyle}>
+          <IssuePanel
+            style={{}}
+            issues={this.props.issues}/>
+        </aside>
+        <h3 style={issueNameStyle}>{this.props.params.issueName}</h3>
         {
-          !this.state.creatingState &&
-          <div>
-            <h3 style={{zIndex: '1'}}>{this.issueName}</h3>
-            <div style={{width: "30%", maxHeight: "75%", position: "fixed", top: "20%", left: "45%", backgroundColor: "#FFFFFF", overflowY: "auto", zIndex: '1'}}>
+          this.state.editing ?
+            <div style={inputPanelStyle}>
               <EditorPanel
-                create_pile={this.create_pile}
-                currentIssue={this.issueName}/>
+                create_pile={this.create_pile}/>
+              <span
+                style={{display: "inline-block", width: "30%", marginTop: "2%", fontWeight: "normal", color: "#9C9898", cursor: "pointer"}}
+                onClick={(event) => {event.preventDefault();event.stopPropagation();this.setState({editing: false, renderPiles: false})}}>Cancel</span>
             </div>
-            <div
-              style={{cursor:"pointer"}}
-              onClick={(event) => {event.preventDefault();event.stopPropagation();this.state.userPilesList?this.setState({userPilesList: false}):this.setState({userPilesList: true})}}>
-              {
-                this.state.userPilesList &&
-                <ModalBox>
-                  <UserPilesList
-                    allepiles={this.props.allepiles}
-                    currentIssue={this.issueName}
-                    attach_pile={this.attach_pile_issue}/>
-                </ModalBox>
-              }
-              PullPile
-            </div>
-          </div>
+            : <div
+                style={inputEntryStyle}
+                onClick={this.handle_click_input}>
+              </div>
         }
-        {
-          this.state.creatingState &&
-          <div style={{width: "50%", height: "45%", position: "fixed", top: "18%", left: "28%", backgroundColor: "#FFFFFF", boxShadow: "0 0 8px 2px"}}>
-            <h3>{this.issueName}</h3>
-          </div>
-        }
-        <span style={{cursor: "pointer"}} onClick={(event) => {event.preventDefault();event.stopPropagation();this.state.creatingState?this.setState({creatingState: false}):this.setState({creatingState: true})}}>Creating</span>
-        <ul style={{width: "80%", maxHeight: "85vh", padding: '0', position: "absolute", top: '40%', left: "3%", transform: "translate(0, -40%)", listStyle: "none", overflow: "auto"}}>
-          {this.state.issuePiles}
-        </ul>
-      </section>
+      </div>
     )
   }
 }

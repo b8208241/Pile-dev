@@ -1,8 +1,7 @@
 import React from 'react';
-import {connect} from 'react-redux';
 import DisplayEditor from './editors/DisplayEditor.jsx';
 
-class UserPiles extends React.Component {
+export default class UserPiles extends React.Component {
   constructor(props){
     super(props);
     this.state = {
@@ -20,7 +19,7 @@ class UserPiles extends React.Component {
       height: "90%",
       padding: '0',
       position: "absolute",
-      top: '5%',
+      top: '0',
       left: "0",
       listStyle: "none",
       overflowX: "auto"
@@ -34,9 +33,11 @@ class UserPiles extends React.Component {
     let piles = _renderByOrder(allepiles, keysArr)
 
     return(
-      <ul style={ulStyle}>
-        {piles}
-      </ul>
+      <div>
+        <ul style={ulStyle}>
+          {piles}
+        </ul>
+      </div>
     )
   }
 }
@@ -130,16 +131,3 @@ function _renderByOrder(allepiles, keysArr){
     }
   )
 }
-
-function mapStateToProps (state) {
-  return {
-    allepiles: state.allepiles,
-    tags: state.tags,
-    status: state.status,
-    others: state.others
-  }
-}
-
-export default connect(mapStateToProps)(
-  UserPiles
-)
