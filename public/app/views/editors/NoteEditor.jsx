@@ -1,8 +1,8 @@
 import React from 'react';
+import {Editor, EditorState, ContentState, convertToRaw, convertFromRaw, Modifier} from 'draft-js';
 import LinkifyIt from 'linkify-it';
-import {Editor, EditorState, Modifier, RichUtils, convertToRaw} from 'draft-js';
 
-export default class MainEditor extends React.Component {
+export default class NoteEditor extends React.Component {
   constructor(props){
     super(props);
     this.state = {
@@ -20,7 +20,7 @@ export default class MainEditor extends React.Component {
   }
 
   componentDidMount(){
-    console.log('MainEditor did mount');
+    console.log('NoteEditor did mount');
     this.editor.focus();
   }
 
@@ -42,8 +42,8 @@ export default class MainEditor extends React.Component {
   render(){
     return(
       <div
-        className={this.props.className}
-        style={{}}>
+        style={{width: "100%", height: "100%"}}
+        onClick={(event)=>{event.preventDefault();event.stopPropagation();this.editor.focus();}}>
         <Editor
           editorState={this.props.editorState}
           onChange={this.props.changeEditorState}
