@@ -15,7 +15,7 @@ export default class NoteEditor extends React.Component {
     const linkIf = LinkifyIt().match(text);
     if(linkIf !== 'undefined' && linkIf !== null){
       let link = text.substring(linkIf[0].index, linkIf[0].lastIndex+1);
-      this.props.set_linkData(link);
+      this.props._set_linkData(link);
     }
   }
 
@@ -46,7 +46,7 @@ export default class NoteEditor extends React.Component {
         onClick={(event)=>{event.preventDefault();event.stopPropagation();this.editor.focus();}}>
         <Editor
           editorState={this.props.editorState}
-          onChange={this.props.changeEditorState}
+          onChange={this.props._changeEditorState}
           ref={(element) => {this.editor = element;}}
           handlePastedText= {(text, html) => {this.handle_Paste_linkDetect(text, html);}}
         />

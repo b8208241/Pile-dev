@@ -1,8 +1,10 @@
 import React from 'react';
 import {Editor, EditorState, ContentState, convertToRaw, convertFromRaw} from 'draft-js';
 import createLinkifyPlugin from 'draft-js-linkify-plugin';
+import update from 'immutability-helper';
+import {InputPanel, ViewPanel, ControllPanel, OptionPanel} from './NewThought_Component.jsx';
+import style from '../../resources/css/style_NewThought.js';
 import PasteCard from './editors/PasteCard.jsx';
-import NoteEditor from './editors/NoteEditor.jsx';
 import {pluginsDecoratorCreate} from './generals/draft/pluginsDecoratorCreate.jsx';
 
 const linkifyPlugin = createLinkifyPlugin({target: '_blank'});
@@ -13,76 +15,191 @@ export default class NewThought extends React.Component {
     super(props);
     this.state = {
       editing: false,
+      view: false,
+      issueEditing: false,
+      issueName: "",
+      newThought: [],
+      currentPosition: [],
       currentType: "",
       currentEditor: "",
-      linkData: "",
-      topState: "",
-      rightState: "",
-      bottomState: "",
-      leftState: "",
-      leftTopState: "",
-      rightTopState: "",
-      lefBottomState: "",
-      rightBottomState: ""
+      linkData: ""
     };
-    this.changeEditorState = (newState) => this.setState({currentEditor: newState});
-    this.set_linkData = (link) => this.setState({linkData: link});
-    this.handle_click_optionPanel = (event) => {event.preventDefault();event.stopPropagation();this.setState({editing: true, currentType: "pasteCard"})};
-    this.handle_click_optionNote = this.handle_click_optionNote.bind(this);
-    this.handle_Click_Create = this.handle_Click_Create.bind(this);
-    this.handle_Click_Neighbor = this.handle_Click_Neighbor.bind(this);
+    this._changeEditorState = (newState) => this.setState({currentEditor: newState});
+    this._set_linkData = (link) => this.setState({linkData: link});
+    this._handle_click_optionForNew = this._handle_click_optionForNew.bind(this);
+    this._handle_Click_Neighbor = this._handle_Click_Neighbor.bind(this);
+    this._handle_Click_viewMember = this._handle_Click_viewMember.bind(this);
+    this._handle_Click_controllToView = this._handle_Click_controllToView.bind(this);
+    this._handle_Click_controllToEdit = this._handle_Click_controllToEdit.bind(this);
+    this._handle_Click_Create = this._handle_Click_Create.bind(this);
+    this._handle_Click_GiveUp = this._handle_Click_GiveUp.bind(this);
   }
 
-  handle_click_optionNote(event){
+  _handle_click_optionForNew(event){
     event.preventDefault();
     event.stopPropagation();
+    let defaultArr = [];
+    let i;
+    for(i=0;i<3;i++){
+      let rowArr = [];
+      let j;
+      for(j=0;j<3;j++){
+        let d = new Date();
+        let time = d.getTime();
+        if(i===1 && j===1){
+          rowArr.push(
+            {
+              time: time,
+              type: "note",
+              editor: EditorState.createEmpty(pluginDecoratorsOnlyLink),
+              linkData: ""
+            }
+          );
+          continue;
+        }
+        rowArr.push(
+          {
+            time: time,
+            type: "blank"
+          }
+        )
+      };
+      defaultArr.push(rowArr);
+    };
     this.setState({
       editing: true,
-      currentType: "note",
-      currentEditor: EditorState.createEmpty(pluginDecoratorsOnlyLink),
-      topState: EditorState.createEmpty(pluginDecoratorsOnlyLink),
-      rightState: EditorState.createEmpty(pluginDecoratorsOnlyLink),
-      bottomState: EditorState.createEmpty(pluginDecoratorsOnlyLink),
-      leftState: EditorState.createEmpty(pluginDecoratorsOnlyLink),
-      leftTopState: EditorState.createEmpty(pluginDecoratorsOnlyLink),
-      rightTopState : EditorState.createEmpty(pluginDecoratorsOnlyLink),
-      leftBottomState : EditorState.createEmpty(pluginDecoratorsOnlyLink),
-      rightBottomState : EditorState.createEmpty(pluginDecoratorsOnlyLink)
+      newThought: defaultArr,
+      currentPosition: [1, 1],
+      currentType: defaultArr[1][1].type,
+      currentEditor: defaultArr[1][1].editor
     });
     this.props.set_IndexStatus("input");
   }
 
-  handle_Click_Neighbor(orientation){
-    let target = orientation.concat("State");
-    let currentTargetContent = this.state[target];
-    let top, right, bottom, left, leftTop, rightTop, leftBottom, rightBottom;
-    switch (orientation.length) {
-      case 3:
-        bottom = this.state.currentEditor;
-        break;
-      case 4:
-        right = this.state.currentEditor;
-        break;
-      case 5:
-        left = this.state.currentEditor;
-        break;
-      case 6:
-        top = this.state.currentEditor;
-        break;
-      default:
+  _handle_Click_Neighbor(position){
+    let state = this.state;
+    let currentRow = state.currentPosition[0];
+    let currentColumn = state.currentPosition[1];
+    const newThoughtState = update(state.newThought, {
+      [currentRow]: {
+        [currentColumn]: {
+          $merge: {
+            type:state.currentType,
+            editor: state.currentEditor
+          }
+        }
+      }
+    });
+    if(newThoughtState[position[0]][position[1]].type==="blank"){
+      newThoughtState[position[0]][position[1]].type = "note";
+      newThoughtState[position[0]][position[1]].editor = EditorState.createEmpty(pluginDecoratorsOnlyLink);
+    }
+    if(
+      position[0]*position[1]===0
+      || position[0]===newThoughtState.length-1
+      || position[1]===newThoughtState[position[0]].length-1
+    ){
+      let d = new Date();
+      let time = d.getTime();
+      let blankNeighbor = {
+        time: time,
+        type: "blank"
+      };
+      if(position[0]===0 || position[0]===newThoughtState.length-1){
+        let rowArr=[];
+        let j;
+        for(j=0;j<newThoughtState[position[0]].length;j++){
+          rowArr.push(blankNeighbor)
+        };
+        if(position[0]===0){
+          newThoughtState.unshift(rowArr);
+          position[0] +=1;
+        }else{
+          newThoughtState.push(rowArr);
+        }
+      }else if(position[1]===0 || position[1]===newThoughtState[position[0]].length-1){
+        let i;
+        for(i=0;i<newThoughtState.length;i++){
+          position[1]===0 ? newThoughtState[i].unshift(blankNeighbor) : newThoughtState[i].push(blankNeighbor)
+        }
+        if(position[1]===0){
+          position[1] += 1;
+        }
+      }
+    }
 
-        break;
-    };
     this.setState({
-      currentEditor: currentTargetContent,
-      topState: top,
-      rightState: right,
-      bottomState: bottom,
-      leftState: left
+      newThought: newThoughtState,
+      currentPosition: position,
+      currentType: newThoughtState[position[0]][position[1]].type,
+      currentEditor: newThoughtState[position[0]][position[1]].editor
     })
   }
 
-  handle_Click_Create(event){
+  _handle_Click_viewMember(position){
+    let rowNumber = position[0],
+        columnNumber = position[1],
+        currentType, currentEditor, linkData,
+        targetItem = this.state.newThought[rowNumber][columnNumber];
+    if(targetItem.type === "blank"){
+      Object.assign(
+        targetItem,
+        {
+          type: "note",
+          editor: EditorState.createEmpty(pluginDecoratorsOnlyLink),
+          linkData: ""
+        });
+    }
+    currentType = targetItem.type;
+    currentEditor = targetItem.editor;
+    linkData = targetItem.linkData;
+
+    this.setState({
+      editing: true,
+      view: false,
+      newThought: this.state.newThought,
+      currentPosition: position,
+      currentType: currentType,
+      currentEditor: currentEditor,
+      linkData: linkData
+    })
+  }
+
+  _handle_Click_controllToView(event){
+    event.preventDefault();
+    event.stopPropagation();
+    let currentRow = this.state.currentPosition[0];
+    let currentColumn = this.state.currentPosition[1];
+    let currentType = this.state.currentType;
+    let currentEditor = this.state.currentEditor;
+    const newThoughtState = update(this.state.newThought, {
+      [currentRow]: {
+        [currentColumn]: {
+          $merge: {
+            type: currentType,
+            editor: currentEditor
+          }
+        }
+      }
+    });
+
+    this.setState({
+      newThought: newThoughtState,
+      editing: false,
+      view: true
+    })
+  }
+
+  _handle_Click_controllToEdit(event){
+    event.preventDefault();
+    event.stopPropagation();
+    this.setState({
+      editing: true,
+      view: false
+    })
+  }
+
+  _handle_Click_Create(event){
     event.preventDefault();
     event.stopPropagation();
     let rawContent = convertToRaw(this.state.mainEditorState.getCurrentContent());
@@ -108,6 +225,21 @@ export default class NewThought extends React.Component {
     });
   }
 
+  _handle_Click_GiveUp(event){
+    event.preventDefault();
+    event.stopPropagation();
+    this.setState({
+      editing: false,
+      view: false,
+      newThought: [],
+      currentPosition: [],
+      currentType: "",
+      currentEditor: "",
+      linkData: ""
+    })
+    this.props.set_IndexStatus("");
+  }
+
   componentWillMount(){
 
   }
@@ -117,233 +249,50 @@ export default class NewThought extends React.Component {
   }
 
   render() {
-    let changeEditorState = this.changeEditorState;
-    let handle_Click_Neighbor = this.handle_Click_Neighbor;
-    let set_linkData = this.set_linkData;
-    const state = this.state;
-    const style = {
-      optionNote: {
-        width: "40%",
-        height: "9%",
-        position: "absolute",
-        top: "48%",
-        left: "50%",
-        transform: "translate(-50%, 0)",
-        boxSizing: "border-box",
-        borderBottom: "1px solid #9C9898",
-        cursor: "text"
-      },
-      optionPanel: {
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        width: "100%",
-        height: "16%",
-        position: "absolute",
-        top: "30%",
-        left: "50%",
-        transform: "translate(-50%, 0)"
-      },
-      optionPanel_editing: {
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        width: "75%",
-        height: "10%",
-        position: "absolute",
-        top: "5%",
-        left: "60%",
-        transform: "translate(-50%, 0)"
-      },
-      inputPanel: {
-        width: "64%",
-        minHeight: "42%",
-        maxHeight: "72.25%",
-        position: "absolute",
-        top: "20%",
-        left: "18%",
-        overflow: "visible"
-      },
-      inputPanel_submit: {
-        display: "inline-block",
-        width: "15%",
-        position: "absolute",
-        top: "122%",
-        left: "106%",
-        fontWeight: "bold",
-        fontSize: "3vh",
-        color: "#9C9898",
-        cursor: "pointer",
-        zIndex: "1"
-      },
-      inputPanel_current: {
-        width: "96%",
-        minHeight: "37vh",
-        margin: "0 2%",
-        padding: "2%",
-        boxSizing: "border-box",
-        cursor: "text"
-      },
-      inputPanel_currentWindow: {
-        width: "136%",
-        height: "144%",
-        position: "absolute",
-        top: "50%",
-        left: "50%",
-        transform: "translate(-50%, -50%)",
-        overflow: "hidden",
-        zIndex: "-1"
-      },
-      inputPanel_community: {
-        width: "223%",
-        height: "211%",
-        position: "absolute",
-        top: "50%",
-        left: "50%",
-        transform: "translate(-50%, -50%)"
-      },
-      inputPanel_neighbor: {
-        top: {width: "32%", height: "33%", position: "absolute", top: "0", left: "50%", transform: "translate(-50%, 0)"},
-        left: {width: "32%", height: "33%", position: "absolute", left: "0", top: "50%", transform: "translate(0, -50%)"},
-        right: {width: "32%", height: "33%", position: "absolute", right: "0", top: "50%", transform: "translate(0, -50%)"},
-        bottom: {width: "32%", height: "33%", position: "absolute", bottom: "0", left: "50%", transform: "translate(-50%, 0)"}
-      },
-      input_Note: {
-        backgroundColor: "rgb(255, 255, 200)",
-        boxShadow: "1px 1px 5px 1px",
-      },
-      input_PasteCard: {
-        width: "35%",
-        minHeight: "35vh",
-        maxHeight: "50vh",
-        backgroundColor: "#FFFFFF",
-        boxShadow: "0px 0px 5px 1px",
-        overflowY: "auto"
-      },
-      svg_optionPanel: {
-        width: "16%",
-        height: "100%",
-        margin: "0 2%",
-        cursor: "pointer"
-      }
-    }
-    let inputPanel_community_member = ["leftTop", "top", "rightTop", "left", "right", "leftBottom", "bottom", "rightBottom"];
-    const optionPanel = [];
-    let i;
-    for(i=0 ; i<4 ; i++){
-      optionPanel.push(
-        <svg
-          key={"optionPanel_"+i}
-          style={style.svg_optionPanel}
-          onClick={this.handle_click_optionPanel}>
-          <circle cx="50%" cy="50%" r="40%" style={{stroke: "#EEEEEE", strokeWidth: "2", fill: "#EEEEEE"}}></circle>
-        </svg>
-      )
-    };
-
     return(
-      <div style={{
-          width: "40%",
-          height: "100%",
-          position: "absolute",
-          top: "0",
-          left: "50%",
-          transform: "translate(-50%, 0)"
-        }}>
-        <div
-          style={this.state.editing ? style.optionPanel_editing:style.optionPanel}>
-          {optionPanel}
-        </div>
+      <div style={style.newThought}>
         {
-          state.editing ?
-          <div
-            style={style.inputPanel}>
-            {
-              ((currentType) => {
-                switch (currentType) {
-                  case "pasteCard":
-                    return (
-                      <div style={style.input_PasteCard}>
-
-                      </div>
-                    )
-                    break;
-                  default:
-                    return (
-                      <div style={Object.assign({}, style.inputPanel_current, style.input_Note)}>
-                        <NoteEditor
-                          editorState={state.currentEditor}
-                          changeEditorState={changeEditorState}
-                          set_linkData={set_linkData}/>
-                      </div>
-                    )
-                    break;
-                };
-              })(state.currentType)
-            }
-            <div
-              style={style.inputPanel_currentWindow}>
-              <div
-                style={style.inputPanel_community}>
-                {
-                  inputPanel_community_member.map(
-                    function(position, index){
-                      let positionName = position+"State";
-                      return (
-                        <NeighborEditor
-                          style={state[positionName].getCurrentContent().hasText() ? Object.assign({}, style.inputPanel_neighbor[position], style.input_Note) : style.inputPanel_neighbor[position]}
-                          editorState={state[positionName]}
-                          orientation={position}
-                          handle_Click_Neighbor={handle_Click_Neighbor}/>
-                      )
-                    }
-                  )
-                }
-              </div>
-            </div>
-            <span
-              style={style.inputPanel_submit}
-              onClick={this.handle_Click_Create}
-              >save</span>
-          </div>
-          : <div
-              style={style.optionNote}
-              onClick={this.handle_click_optionNote}/>
+          !this.state.view &&
+          <OptionPanel
+            editing={this.state.editing}
+            _handle_click_optionForNew={this._handle_click_optionForNew}/>
         }
-      </div>
-    )
-  }
-}
-
-class NeighborEditor extends React.Component {
-  constructor(props){
-    super(props);
-    this.state = {
-      onMouseOver: false
-    };
-    this.changeEditorState = () => {};
-  }
-
-  render(){
-    let blank_onMouseOver= function(propsStyle){
-      let style_onMouseOver = {
-        boxSizing: "border-box",
-        border: "1px solid #9C9898",
-        boxShadow: "0 0 3px 1px"
-      };
-      return Object.assign({}, propsStyle, style_onMouseOver);
-    }
-    return(
-      <div
-        style={this.state.onMouseOver ? blank_onMouseOver(this.props.style) : this.props.style}
-        onMouseOver={(event)=>{event.preventDefault();event.stopPropagation();this.setState({onMouseOver: true})}}
-        onMouseOut={(event)=>{event.preventDefault();event.stopPropagation();this.setState({onMouseOver: false})}}
-        onClick={(event)=>{event.preventDefault();event.stopPropagation();this.props.handle_Click_Neighbor(this.props.orientation)}}>
-        <Editor
-          editorState={this.props.editorState}
-          onChange={this.changeEditorState}
-          readOnly
-        />
+        {
+          this.state.editing &&
+          <div
+            style={style.newThought_Editing}>
+            <InputPanel
+              newThought={this.state.newThought}
+              currentType={this.state.currentType}
+              currentPosition={this.state.currentPosition}
+              currentEditor={this.state.currentEditor}
+              _handle_Click_Neighbor = {this._handle_Click_Neighbor}
+              _changeEditorState={this._changeEditorState}
+              _set_linkData={this._set_linkData}/>
+            <ControllPanel
+              style={style.controllPanel_Editing}
+              editing={this.state.editing}
+              _handle_Click_controllToView={this._handle_Click_controllToView}
+              _handle_Click_Create={this._handle_Click_Create}
+              _handle_Click_GiveUp={this._handle_Click_GiveUp}/>
+          </div>
+        }
+        {
+          this.state.view &&
+          <div
+            style={style.newThought_View}>
+            <ViewPanel
+              newThought={this.state.newThought}
+              currentPosition={this.state.currentPosition}
+              _handle_Click_viewMember={this._handle_Click_viewMember}/>
+            <ControllPanel
+              style={style.controllPanel_View}
+              editing={this.state.editing}
+              _handle_Click_controllToEdit={this._handle_Click_controllToEdit}
+              _handle_Click_Create={this._handle_Click_Create}
+              _handle_Click_GiveUp={this._handle_Click_GiveUp}/>
+          </div>
+        }
       </div>
     )
   }

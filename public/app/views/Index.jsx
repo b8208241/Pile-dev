@@ -43,7 +43,7 @@ class Index extends React.Component {
       crystal: {
         display: "inline-block",
         position: "absolute",
-        top: "20%",
+        top: "25%",
         left: "50%",
         transform: "translate(-50%, 0)",
         cursor: "pointer",
@@ -52,8 +52,8 @@ class Index extends React.Component {
       crystal_Editing: {
         display: "inline-block",
         position: "absolute",
-        top: "20%",
-        left: "30%",
+        top: "5%",
+        left: "5%",
         transform: "translate(-50%, 0)",
         cursor: "pointer",
         zIndex: "1"
